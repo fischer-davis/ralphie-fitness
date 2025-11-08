@@ -1,26 +1,20 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
-import typescriptLogo from "/typescript.svg";
+import { TRPCProvider } from "./lib/trpc-provider";
 import { Header, Counter } from "@repo/ui";
 
 const App = () => (
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" className="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img
-        src={typescriptLogo}
-        className="logo vanilla"
-        alt="TypeScript logo"
-      />
-    </a>
-    <Header title="Web" />
-    <div className="card">
-      <Counter />
+  <TRPCProvider>
+    <div className="min-h-screen bg-background text-foreground">
+      <Header title="Ralphie Fitness" />
+      <main className="container mx-auto p-4">
+        <div className="card">
+          <Counter />
+        </div>
+      </main>
     </div>
-  </div>
+  </TRPCProvider>
 );
 
 createRoot(document.getElementById("app")!).render(<App />);
