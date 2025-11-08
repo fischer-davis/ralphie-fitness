@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form"
 import { z } from "zod"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "@tanstack/react-router"
 import { signIn } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -39,7 +39,7 @@ export function LoginForm() {
           setError(result.error.message || "Invalid credentials")
         } else {
           // Redirect to dashboard or home page
-          navigate("/")
+          navigate({ to: "/" })
         }
       } catch (err) {
         setError("An error occurred. Please try again.")
@@ -133,12 +133,12 @@ export function LoginForm() {
           </Button>
           <p className="text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <a
-              href="/register"
+            <Link
+              to="/register"
               className="font-medium text-primary hover:underline"
             >
               Sign up
-            </a>
+            </Link>
           </p>
         </CardFooter>
       </form>

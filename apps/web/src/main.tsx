@@ -1,20 +1,30 @@
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { RouterProvider, createRouter } from "@tanstack/react-router";
 import "./style.css";
 import { TRPCProvider } from "./lib/trpc-provider";
-import { HomePage } from "./pages/home";
-import { LoginPage } from "./pages/login";
-import { RegisterPage } from "./pages/register";
+
+// Import the generated route tree
+import { routeTree } from "./routeTree.gen";
+
+// Create a new router instance
+const router = createRouter({
+  routeTree,
+  defaultPreload: "intent",
+  context: {
+    session: undefined!,
+  },
+});
+
+// Register the router instance for type safety
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
 
 const App = () => (
   <TRPCProvider>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-      </Routes>
-    </BrowserRouter>
+    <RouterProvider router={router} />
   </TRPCProvider>
 );
 

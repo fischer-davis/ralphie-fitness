@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form"
 import { z } from "zod"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "@tanstack/react-router"
 import { signUp } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -42,7 +42,7 @@ export function RegisterForm() {
           setError(result.error.message || "Failed to create account")
         } else {
           // Redirect to dashboard or home page
-          navigate("/")
+          navigate({ to: "/" })
         }
       } catch (err) {
         setError("An error occurred. Please try again.")
@@ -201,12 +201,12 @@ export function RegisterForm() {
           </Button>
           <p className="text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <a
-              href="/login"
+            <Link
+              to="/login"
               className="font-medium text-primary hover:underline"
             >
               Sign in
-            </a>
+            </Link>
           </p>
         </CardFooter>
       </form>
