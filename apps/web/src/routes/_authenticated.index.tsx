@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSession, signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Header, Counter } from "@repo/ui";
+import { Header } from "@repo/ui";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: HomePage,
@@ -31,8 +31,48 @@ function HomePage() {
           </CardContent>
         </Card>
 
-        <div className="card">
-          <Counter />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Dashboard</CardTitle>
+              <CardDescription>
+                View your workout stats and progress
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link to="/dashboard">
+                <Button>View Dashboard</Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Workout Templates</CardTitle>
+              <CardDescription>
+                Create and manage your workout templates
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link to="/templates">
+                <Button>Manage Templates</Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>My Workouts</CardTitle>
+              <CardDescription>
+                Record and track your workout sessions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link to="/workouts">
+                <Button>Record Workout</Button>
+              </Link>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>
