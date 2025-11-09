@@ -4,7 +4,6 @@ import { pgTable, text, timestamp, uuid, boolean, integer } from 'drizzle-orm/pg
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   email: text('email').notNull().unique(),
-  password: text('password'),
   name: text('name'),
   emailVerified: boolean('email_verified').default(false),
   image: text('image'),
@@ -26,11 +25,13 @@ export const sessions = pgTable('sessions', {
 export const accounts = pgTable('accounts', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  password: text('password'),
   accountId: text('account_id').notNull(),
   providerId: text('provider_id').notNull(),
   accessToken: text('access_token'),
   refreshToken: text('refresh_token'),
   expiresAt: timestamp('expires_at'),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
