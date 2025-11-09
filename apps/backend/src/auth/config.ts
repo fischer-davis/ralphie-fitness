@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { randomUUID } from "crypto";
 import { db } from "../db";
 import * as schema from "../db/schema";
 
@@ -28,6 +29,9 @@ export const auth = betterAuth({
   trustedOrigins: [
     process.env.FRONTEND_URL || 'http://localhost:5173',
   ],
+  advanced: {
+    generateId: () => randomUUID(),
+  },
 });
 
 export type Auth = typeof auth;
