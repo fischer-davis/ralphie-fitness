@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Header, Counter } from "@repo/ui";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: HomePage,
@@ -19,7 +20,12 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Header title="Ralphie Fitness" />
+      <div className="border-b border-border">
+        <div className="container mx-auto flex items-center justify-between p-4">
+          <Header title="Ralphie Fitness" />
+          <ModeToggle />
+        </div>
+      </div>
       <main className="container mx-auto p-4">
         <Card className="mb-4">
           <CardHeader>

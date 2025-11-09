@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LoginForm } from "@/components/auth/login-form";
 import { useSession } from "@/lib/auth";
 import { useEffect } from "react";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -36,7 +37,10 @@ function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-background p-4">
+      <div className="absolute right-4 top-4">
+        <ModeToggle />
+      </div>
       <LoginForm />
     </div>
   );
