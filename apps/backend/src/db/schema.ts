@@ -4,6 +4,7 @@ import { pgTable, text, timestamp, uuid, boolean, integer } from 'drizzle-orm/pg
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   email: text('email').notNull().unique(),
+  password: text('password'),
   name: text('name'),
   emailVerified: boolean('email_verified').default(false),
   image: text('image'),
