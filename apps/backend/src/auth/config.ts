@@ -4,14 +4,14 @@ import { randomUUID } from "crypto";
 import { db } from "../db";
 import * as schema from "../db/schema";
 
-export const auth = betterAuth({
+const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
-      user: schema.users,
-      session: schema.sessions,
-      account: schema.accounts,
-      verification: schema.verificationTokens,
+      user: schema.user,
+      session: schema.session,
+      account: schema.account,
+      verification: schema.verification,
     },
   }),
   emailAndPassword: {
@@ -29,9 +29,8 @@ export const auth = betterAuth({
   trustedOrigins: [
     process.env.FRONTEND_URL || 'http://localhost:5173',
   ],
-  advanced: {
-    generateId: () => randomUUID(),
-  },
 });
 
 export type Auth = typeof auth;
+export { auth };
+export default auth;
