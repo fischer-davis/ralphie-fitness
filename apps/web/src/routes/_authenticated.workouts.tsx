@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useSession } from "@/lib/auth";
-import { trpc } from "@/lib/trpc";
+import { useTRPC } from "@/lib/trpc";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,31 +23,40 @@ function WorkoutsPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [lapTimes, setLapTimes] = useState<number[]>([]);
   const [currentLapInput, setCurrentLapInput] = useState("");
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
-  const { data: templates } = trpc.workoutTemplates.getAll.useQuery(
-    { userId: session?.user.id || "" },
-    { enabled: !!session?.user.id }
-  );
+  const templatesQueryOptions = trpc.workoutTemplates.getAll.queryOptions({
+    userId: session?.user.id || "",
+  });
+  const { data: templates } = useQuery(templatesQueryOptions);
 
-  const { data: instances, refetch: refetchInstances } = trpc.workoutInstances.getAll.useQuery(
-    { userId: session?.user.id || "", limit: 20 },
-    { enabled: !!session?.user.id }
-  );
+  const instancesQueryOptions = trpc.workoutInstances.getAll.queryOptions({
+    userId: session?.user.id || "",
+    limit: 20,
+  });
+  const { data: instances } = useQuery(instancesQueryOptions);
 
-  const createInstanceMutation = trpc.workoutInstances.create.useMutation({
+  const createInstanceMutationOptions = trpc.workoutInstances.create.mutationOptions({
     onSuccess: () => {
-      refetchInstances();
+      queryClient.invalidateQueries({
+        queryKey: trpc.workoutInstances.getAll.queryKey(),
+      });
       setSelectedTemplate(null);
       setLapTimes([]);
       setCurrentLapInput("");
     },
   });
+  const createInstanceMutation = useMutation(createInstanceMutationOptions);
 
-  const markCompleteMutation = trpc.workoutInstances.markComplete.useMutation({
+  const markCompleteMutationOptions = trpc.workoutInstances.markComplete.mutationOptions({
     onSuccess: () => {
-      refetchInstances();
+      queryClient.invalidateQueries({
+        queryKey: trpc.workoutInstances.getAll.queryKey(),
+      });
     },
   });
+  const markCompleteMutation = useMutation(markCompleteMutationOptions);
 
   const template = templates?.find((t) => t.id === selectedTemplate);
 

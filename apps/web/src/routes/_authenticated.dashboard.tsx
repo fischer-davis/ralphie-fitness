@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSession } from "@/lib/auth";
-import { trpc } from "@/lib/trpc";
+import { useTRPC } from "@/lib/trpc";
+import { useQuery } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -15,31 +16,33 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 function DashboardPage() {
   const { data: session } = useSession();
+  const trpc = useTRPC();
 
-  const { data: overallStats } = trpc.stats.getOverallStats.useQuery(
-    { userId: session?.user.id || "" },
-    { enabled: !!session?.user.id }
-  );
+  const overallStatsQueryOptions = trpc.stats.getOverallStats.queryOptions({
+    userId: session?.user.id || "",
+  });
+  const { data: overallStats } = useQuery(overallStatsQueryOptions);
 
-  const { data: runStats } = trpc.stats.getRunStats.useQuery(
-    { userId: session?.user.id || "" },
-    { enabled: !!session?.user.id }
-  );
+  const runStatsQueryOptions = trpc.stats.getRunStats.queryOptions({
+    userId: session?.user.id || "",
+  });
+  const { data: runStats } = useQuery(runStatsQueryOptions);
 
-  const { data: repStats } = trpc.stats.getRepStats.useQuery(
-    { userId: session?.user.id || "" },
-    { enabled: !!session?.user.id }
-  );
+  const repStatsQueryOptions = trpc.stats.getRepStats.queryOptions({
+    userId: session?.user.id || "",
+  });
+  const { data: repStats } = useQuery(repStatsQueryOptions);
 
-  const { data: timeStats } = trpc.stats.getTimeStats.useQuery(
-    { userId: session?.user.id || "" },
-    { enabled: !!session?.user.id }
-  );
+  const timeStatsQueryOptions = trpc.stats.getTimeStats.queryOptions({
+    userId: session?.user.id || "",
+  });
+  const { data: timeStats } = useQuery(timeStatsQueryOptions);
 
-  const { data: recentActivity } = trpc.stats.getRecentActivity.useQuery(
-    { userId: session?.user.id || "", limit: 5 },
-    { enabled: !!session?.user.id }
-  );
+  const recentActivityQueryOptions = trpc.stats.getRecentActivity.queryOptions({
+    userId: session?.user.id || "",
+    limit: 5,
+  });
+  const { data: recentActivity } = useQuery(recentActivityQueryOptions);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

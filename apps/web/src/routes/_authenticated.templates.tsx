@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useSession } from "@/lib/auth";
-import { trpc } from "@/lib/trpc";
+import { useTRPC } from "@/lib/trpc";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,25 +24,33 @@ function TemplatesPage() {
   const { data: session } = useSession();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [workoutType, setWorkoutType] = useState<WorkoutType | null>(null);
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
-  const { data: templates, refetch } = trpc.workoutTemplates.getAll.useQuery(
-    { userId: session?.user.id || "" },
-    { enabled: !!session?.user.id }
-  );
+  const templatesQueryOptions = trpc.workoutTemplates.getAll.queryOptions({
+    userId: session?.user.id || "",
+  });
+  const { data: templates } = useQuery(templatesQueryOptions);
 
-  const createMutation = trpc.workoutTemplates.create.useMutation({
+  const createMutationOptions = trpc.workoutTemplates.create.mutationOptions({
     onSuccess: () => {
-      refetch();
+      queryClient.invalidateQueries({
+        queryKey: trpc.workoutTemplates.getAll.queryKey(),
+      });
       setShowCreateForm(false);
       setWorkoutType(null);
     },
   });
+  const createMutation = useMutation(createMutationOptions);
 
-  const deleteMutation = trpc.workoutTemplates.delete.useMutation({
+  const deleteMutationOptions = trpc.workoutTemplates.delete.mutationOptions({
     onSuccess: () => {
-      refetch();
+      queryClient.invalidateQueries({
+        queryKey: trpc.workoutTemplates.getAll.queryKey(),
+      });
     },
   });
+  const deleteMutation = useMutation(deleteMutationOptions);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
