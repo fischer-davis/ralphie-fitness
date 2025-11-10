@@ -13,6 +13,9 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated.index'
+import { Route as AuthenticatedWorkoutsRouteImport } from './routes/_authenticated.workouts'
+import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authenticated.templates'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -33,15 +36,36 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedWorkoutsRoute = AuthenticatedWorkoutsRouteImport.update({
+  id: '/workouts',
+  path: '/workouts',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTemplatesRoute = AuthenticatedTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/templates': typeof AuthenticatedTemplatesRoute
+  '/workouts': typeof AuthenticatedWorkoutsRoute
   '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/templates': typeof AuthenticatedTemplatesRoute
+  '/workouts': typeof AuthenticatedWorkoutsRoute
   '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
@@ -49,18 +73,30 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/templates': typeof AuthenticatedTemplatesRoute
+  '/_authenticated/workouts': typeof AuthenticatedWorkoutsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/register' | '/'
+  fullPaths:
+    | '/login'
+    | '/register'
+    | '/dashboard'
+    | '/templates'
+    | '/workouts'
+    | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register' | '/'
+  to: '/login' | '/register' | '/dashboard' | '/templates' | '/workouts' | '/'
   id:
     | '__root__'
     | '/_authenticated'
     | '/login'
     | '/register'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/templates'
+    | '/_authenticated/workouts'
     | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
@@ -100,14 +136,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/workouts': {
+      id: '/_authenticated/workouts'
+      path: '/workouts'
+      fullPath: '/workouts'
+      preLoaderRoute: typeof AuthenticatedWorkoutsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/templates': {
+      id: '/_authenticated/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof AuthenticatedTemplatesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedTemplatesRoute: typeof AuthenticatedTemplatesRoute
+  AuthenticatedWorkoutsRoute: typeof AuthenticatedWorkoutsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedTemplatesRoute: AuthenticatedTemplatesRoute,
+  AuthenticatedWorkoutsRoute: AuthenticatedWorkoutsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 

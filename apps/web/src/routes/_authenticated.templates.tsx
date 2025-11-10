@@ -20,6 +20,19 @@ export const Route = createFileRoute("/_authenticated/templates")({
 
 type WorkoutType = "run" | "reps" | "time";
 
+interface WorkoutTemplate {
+  id: string;
+  userId: string;
+  name: string;
+  type: WorkoutType;
+  description: string | null;
+  distance: number | null;
+  targetReps: number | null;
+  targetDuration: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 function TemplatesPage() {
   const { data: session } = useSession();
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -30,27 +43,29 @@ function TemplatesPage() {
   const templatesQueryOptions = trpc.workoutTemplates.getAll.queryOptions({
     userId: session?.user.id || "",
   });
-  const { data: templates } = useQuery(templatesQueryOptions);
+  const { data: templates = [] } = useQuery(templatesQueryOptions);
 
-  const createMutationOptions = trpc.workoutTemplates.create.mutationOptions({
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: trpc.workoutTemplates.getAll.queryKey(),
-      });
-      setShowCreateForm(false);
-      setWorkoutType(null);
-    },
-  });
-  const createMutation = useMutation(createMutationOptions);
+  const createMutation = useMutation(
+    trpc.workoutTemplates.create.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.workoutTemplates.getAll.queryKey(),
+        });
+        setShowCreateForm(false);
+        setWorkoutType(null);
+      },
+    }) as any
+  );
 
-  const deleteMutationOptions = trpc.workoutTemplates.delete.mutationOptions({
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: trpc.workoutTemplates.getAll.queryKey(),
-      });
-    },
-  });
-  const deleteMutation = useMutation(deleteMutationOptions);
+  const deleteMutation = useMutation(
+    trpc.workoutTemplates.delete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.workoutTemplates.getAll.queryKey(),
+        });
+      },
+    }) as any
+  );
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -69,17 +84,17 @@ function TemplatesPage() {
 
     if (workoutType === "run") {
       const distance = parseFloat(formData.get("distance") as string);
-      createMutation.mutate({ ...baseData, distance });
+      (createMutation.mutate as any)({ ...baseData, distance });
     } else if (workoutType === "reps") {
       const targetReps = parseInt(formData.get("targetReps") as string);
-      createMutation.mutate({ ...baseData, targetReps });
+      (createMutation.mutate as any)({ ...baseData, targetReps });
     } else if (workoutType === "time") {
       const targetDuration = parseInt(formData.get("targetDuration") as string);
-      createMutation.mutate({ ...baseData, targetDuration });
+      (createMutation.mutate as any)({ ...baseData, targetDuration });
     }
   };
 
-  const getTemplateDetails = (template: typeof templates[0]) => {
+  const getTemplateDetails = (template: WorkoutTemplate) => {
     if (template.type === "run" && template.distance) {
       return `${template.distance} miles`;
     } else if (template.type === "reps" && template.targetReps) {
@@ -218,7 +233,7 @@ function TemplatesPage() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {templates?.map((template) => (
+          {(templates as WorkoutTemplate[]).map((template: WorkoutTemplate) => (
             <Card key={template.id}>
               <CardHeader>
                 <CardTitle className="flex justify-between items-start">
@@ -249,7 +264,7 @@ function TemplatesPage() {
                   variant="outline"
                   onClick={() => {
                     if (confirm("Are you sure you want to delete this template?")) {
-                      deleteMutation.mutate({
+                      (deleteMutation.mutate as any)({
                         id: template.id,
                         userId: session?.user.id || "",
                       });
@@ -263,7 +278,7 @@ function TemplatesPage() {
           ))}
         </div>
 
-        {templates && templates.length === 0 && !showCreateForm && (
+        {(templates as WorkoutTemplate[]).length === 0 && !showCreateForm && (
           <Card>
             <CardHeader>
               <CardTitle>No templates yet</CardTitle>
