@@ -10,6 +10,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Activity, Target, Calendar } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 
 export const Route = createFileRoute("/_authenticated/progress")({
   component: ProgressPage,
@@ -130,82 +144,97 @@ function ProgressPage() {
 
         {/* Running Progress Chart */}
         {runStats && runStats.chartData.length > 0 && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Running Progress</CardTitle>
-              <CardDescription>
-                Your running performance over the last {runStats.chartData.length} runs
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {runStats.chartData.map((data: any, idx: number) => {
-                  const pace = data.duration / 60 / data.distance;
-                  const prevPace =
-                    idx > 0
-                      ? runStats.chartData[idx - 1].duration /
-                        60 /
-                        runStats.chartData[idx - 1].distance
-                      : null;
-                  const improvement = prevPace ? ((prevPace - pace) / prevPace) * 100 : null;
+          <>
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Running Pace Trend</CardTitle>
+                <CardDescription>
+                  Your pace (minutes per mile) over the last {runStats.chartData.length} runs
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart
+                    data={runStats.chartData.map((data: any) => ({
+                      date: formatDate(data.date).replace(', ' + new Date(data.date).getFullYear(), ''),
+                      pace: Number((data.duration / 60 / data.distance).toFixed(2)),
+                      distance: data.distance,
+                    }))}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis
+                      dataKey="date"
+                      className="text-xs"
+                      tick={{ fontSize: 12 }}
+                    />
+                    <YAxis
+                      label={{ value: 'Pace (min/mi)', angle: -90, position: 'insideLeft' }}
+                      className="text-xs"
+                      tick={{ fontSize: 12 }}
+                      domain={['auto', 'auto']}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                      }}
+                      labelStyle={{ color: 'hsl(var(--foreground))' }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="pace"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
 
-                  return (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between p-3 border rounded-lg"
-                    >
-                      <div className="flex items-center gap-4">
-                        <Calendar className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <div className="font-medium">{formatDate(data.date)}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {data.distance} miles
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <div className="font-medium">
-                            {formatDuration(data.duration)}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {pace.toFixed(2)} min/mi
-                          </div>
-                        </div>
-
-                        {improvement !== null && (
-                          <div
-                            className={`flex items-center gap-1 text-sm font-medium ${
-                              improvement > 0
-                                ? "text-green-600"
-                                : improvement < 0
-                                ? "text-red-600"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {improvement > 0 ? (
-                              <>
-                                <TrendingUp className="h-4 w-4" />
-                                <span>+{improvement.toFixed(1)}%</span>
-                              </>
-                            ) : improvement < 0 ? (
-                              <>
-                                <TrendingDown className="h-4 w-4" />
-                                <span>{improvement.toFixed(1)}%</span>
-                              </>
-                            ) : (
-                              <span>-</span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Running Distance</CardTitle>
+                <CardDescription>
+                  Distance covered over your last {runStats.chartData.length} runs
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart
+                    data={runStats.chartData.map((data: any) => ({
+                      date: formatDate(data.date).replace(', ' + new Date(data.date).getFullYear(), ''),
+                      distance: data.distance,
+                      duration: data.duration / 60,
+                    }))}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis
+                      dataKey="date"
+                      className="text-xs"
+                      tick={{ fontSize: 12 }}
+                    />
+                    <YAxis
+                      label={{ value: 'Distance (mi)', angle: -90, position: 'insideLeft' }}
+                      className="text-xs"
+                      tick={{ fontSize: 12 }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                      }}
+                      labelStyle={{ color: 'hsl(var(--foreground))' }}
+                    />
+                    <Bar dataKey="distance" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </>
         )}
 
         {/* Rep-Based Progress */}
@@ -218,72 +247,39 @@ function ProgressPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {repStats.chartData.map((data: any, idx: number) => {
-                  const completion = (data.reps / data.target) * 100;
-                  const prevCompletion =
-                    idx > 0
-                      ? (repStats.chartData[idx - 1].reps /
-                          repStats.chartData[idx - 1].target) *
-                        100
-                      : null;
-                  const improvement = prevCompletion
-                    ? completion - prevCompletion
-                    : null;
-
-                  return (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between p-3 border rounded-lg"
-                    >
-                      <div className="flex items-center gap-4">
-                        <Calendar className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <div className="font-medium">{formatDate(data.date)}</div>
-                          <div className="text-sm text-muted-foreground">
-                            Target: {data.target} reps
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <div className="font-medium">{data.reps} reps</div>
-                          <div className="text-sm text-muted-foreground">
-                            {completion.toFixed(0)}% of target
-                          </div>
-                        </div>
-
-                        {improvement !== null && (
-                          <div
-                            className={`flex items-center gap-1 text-sm font-medium ${
-                              improvement > 0
-                                ? "text-green-600"
-                                : improvement < 0
-                                ? "text-red-600"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {improvement > 0 ? (
-                              <>
-                                <TrendingUp className="h-4 w-4" />
-                                <span>+{improvement.toFixed(1)}%</span>
-                              </>
-                            ) : improvement < 0 ? (
-                              <>
-                                <TrendingDown className="h-4 w-4" />
-                                <span>{improvement.toFixed(1)}%</span>
-                              </>
-                            ) : (
-                              <span>-</span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={repStats.chartData.map((data: any) => ({
+                    date: formatDate(data.date).replace(', ' + new Date(data.date).getFullYear(), ''),
+                    reps: data.reps,
+                    target: data.target,
+                    completion: Math.round((data.reps / data.target) * 100),
+                  }))}
+                >
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis
+                    dataKey="date"
+                    className="text-xs"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis
+                    label={{ value: 'Reps', angle: -90, position: 'insideLeft' }}
+                    className="text-xs"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                    }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  />
+                  <Legend />
+                  <Bar dataKey="reps" fill="hsl(var(--primary))" name="Actual" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="target" fill="hsl(var(--muted))" name="Target" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         )}
