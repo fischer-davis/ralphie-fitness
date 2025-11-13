@@ -181,16 +181,56 @@ Add to main router in `apps/backend/src/trpc/router.ts`
 
 ### Frontend tRPC Usage
 
+**IMPORTANT**: This project uses tRPC v11 with the `createTRPCContext` pattern. Always follow this pattern:
+
 ```typescript
-import { trpc } from '@/lib/trpc';
+import { useTRPC } from '@/lib/trpc';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 function MyComponent() {
-  const { data, isLoading } = trpc.example.getAll.useQuery();
-  const createMutation = trpc.example.create.useMutation();
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
-  // Use the data...
+  // Queries: Use queryOptions() with useQuery()
+  const myQueryOptions = trpc.example.getAll.queryOptions({
+    /* inputs */
+  });
+  const { data } = useQuery(myQueryOptions);
+
+  // Mutations: Use mutationOptions() with useMutation()
+  const myMutationOptions = trpc.example.create.mutationOptions({
+    onSuccess: () => {
+      // Invalidate queries using queryKey()
+      queryClient.invalidateQueries({
+        queryKey: trpc.example.getAll.queryKey(),
+      });
+    },
+  });
+  const myMutation = useMutation(myMutationOptions);
+
+  // Use the mutation
+  const handleSubmit = () => {
+    myMutation.mutate({ name: 'example' });
+  };
+
+  return (
+    <div>
+      {data && <pre>{JSON.stringify(data)}</pre>}
+      <button onClick={handleSubmit}>Create</button>
+    </div>
+  );
 }
 ```
+
+**Key Points**:
+- Always use `const trpc = useTRPC()` at the top of your component
+- Use `trpc.procedure.queryOptions()` with `useQuery()` from TanStack Query
+- Use `trpc.procedure.mutationOptions()` with `useMutation()` from TanStack Query
+- Use `trpc.procedure.queryKey()` for cache invalidation with `queryClient.invalidateQueries()`
+- Import `useQuery`, `useMutation`, and `useQueryClient` from `@tanstack/react-query`
+- Never import and use `trpc` directly - always use the `useTRPC()` hook
+
+**Reference**: [tRPC TanStack Query Documentation](https://trpc.io/docs/client/tanstack-react-query/usage)
 
 ## Authentication
 
@@ -303,7 +343,10 @@ The project is fully type-safe from database to frontend:
 ## Notes for AI Assistants
 
 - Always run `npm run format` before committing
-- Use the tRPC router types for API calls - they're exported from backend
+- **tRPC Usage**: Always use `const trpc = useTRPC()` hook in components, never import `trpc` directly
+- **tRPC Queries**: Use `useQuery(trpc.procedure.queryOptions({ ... }))` pattern
+- **tRPC Mutations**: Use `useMutation(trpc.procedure.mutationOptions({ ... }))` pattern
+- **Cache Invalidation**: Use `queryClient.invalidateQueries({ queryKey: trpc.procedure.queryKey() })`
 - Database migrations should be generated, not hand-written
 - Follow the existing code patterns for consistency
 - Use shadcn components when building UI - they're already configured

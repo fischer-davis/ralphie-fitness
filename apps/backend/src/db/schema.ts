@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, pgEnum, real, jsonb } from "drizzle-orm/pg-core";
 
 // Better-auth generated schema
 export const user = pgTable("user", {
@@ -62,6 +62,65 @@ export const verification = pgTable("verification", {
 });
 
 // Application-specific tables
+
+// Workout type enum
+export const workoutTypeEnum = pgEnum('workout_type', ['run', 'reps', 'time']);
+
+// Workout templates - reusable workout definitions
+export const workoutTemplates = pgTable('workout_templates', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  type: workoutTypeEnum('type').notNull(),
+  description: text('description'),
+
+  // Type-specific fields
+  // For 'run' type
+  distance: real('distance'), // in miles
+
+  // For 'reps' type (push-ups, sit-ups, squats, etc.)
+  targetReps: integer('target_reps'),
+
+  // For 'time' type (planks, etc.)
+  targetDuration: integer('target_duration'), // in seconds
+
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at')
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+// Workout instances - records of completed workouts
+export const workoutInstances = pgTable('workout_instances', {
+  id: text('id').primaryKey(),
+  templateId: text('template_id').notNull().references(() => workoutTemplates.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+
+  // Completion tracking
+  completed: boolean('completed').default(false).notNull(),
+  completedAt: timestamp('completed_at'),
+
+  // Type-specific result fields
+  // For 'run' type
+  duration: integer('duration'), // in seconds
+  lapTimes: jsonb('lap_times').$type<number[]>(), // array of lap times in seconds
+
+  // For 'reps' type
+  actualReps: integer('actual_reps'),
+
+  // For 'time' type
+  actualDuration: integer('actual_duration'), // in seconds
+
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at')
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+// Legacy workouts table (keeping for backward compatibility)
 export const workouts = pgTable('workouts', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
