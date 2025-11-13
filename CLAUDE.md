@@ -136,7 +136,30 @@ npm run db:generate  # Generate migrations from schema
 npm run db:migrate   # Run migrations
 npm run db:push      # Push schema directly (dev only)
 npm run db:studio    # Open Drizzle Studio GUI
+npm run db:seed      # Seed database with test data
 ```
+
+### Database Seeding
+
+The database includes a comprehensive seed script that populates test data:
+
+```bash
+cd apps/backend
+npm run db:seed
+```
+
+This will create:
+- **Test user** with login credentials (see below)
+- **16 workout templates** (5 runs, 6 reps workouts, 5 time-based exercises)
+- **120 workout instances** with realistic data over 6 months
+- **30 legacy workouts** for backward compatibility
+- **10 random users** for testing
+
+**Test User Login:**
+- **Email**: `test@ralphie.fitness`
+- **Password**: `TestPassword123!`
+
+The test user has extensive workout history including runs, strength training, and time-based exercises.
 
 ### Adding shadcn/ui Components
 
