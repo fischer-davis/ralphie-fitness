@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { router, publicProcedure } from '../trpc';
 import { workoutTemplates } from '../../db/schema';
 import { eq, and } from 'drizzle-orm';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 const workoutTypeSchema = z.enum(['run', 'reps', 'time']);
 

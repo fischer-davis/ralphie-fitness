@@ -26,23 +26,23 @@ function DashboardPage() {
   const runStatsQueryOptions = trpc.stats.getRunStats.queryOptions({
     userId: session?.user.id || "",
   });
-  const { data: runStats } = useQuery(runStatsQueryOptions);
+  const { data: runStats = null as any } = useQuery(runStatsQueryOptions);
 
   const repStatsQueryOptions = trpc.stats.getRepStats.queryOptions({
     userId: session?.user.id || "",
   });
-  const { data: repStats } = useQuery(repStatsQueryOptions);
+  const { data: repStats = null as any } = useQuery(repStatsQueryOptions);
 
   const timeStatsQueryOptions = trpc.stats.getTimeStats.queryOptions({
     userId: session?.user.id || "",
   });
-  const { data: timeStats } = useQuery(timeStatsQueryOptions);
+  const { data: timeStats = null as any } = useQuery(timeStatsQueryOptions);
 
   const recentActivityQueryOptions = trpc.stats.getRecentActivity.queryOptions({
     userId: session?.user.id || "",
     limit: 5,
   });
-  const { data: recentActivity } = useQuery(recentActivityQueryOptions);
+  const { data: recentActivity = [] as any[] } = useQuery(recentActivityQueryOptions);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -71,7 +71,7 @@ function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {overallStats?.totalCompletedWorkouts || 0}
+                {(overallStats as any)?.totalCompletedWorkouts || 0}
               </div>
             </CardContent>
           </Card>
@@ -123,7 +123,7 @@ function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {runStats.chartData.map((data, idx) => (
+                {runStats.chartData.map((data: any, idx: number) => (
                   <div key={idx} className="flex items-center justify-between border-b pb-2">
                     <div className="text-sm text-muted-foreground">
                       {formatDate(data.date)}
@@ -173,7 +173,7 @@ function DashboardPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                {repStats.chartData.map((data, idx) => (
+                {repStats.chartData.map((data: any, idx: number) => (
                   <div key={idx} className="flex items-center justify-between border-b pb-2">
                     <div className="text-sm text-muted-foreground">
                       {formatDate(data.date)}
@@ -222,7 +222,7 @@ function DashboardPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                {timeStats.chartData.map((data, idx) => (
+                {timeStats.chartData.map((data: any, idx: number) => (
                   <div key={idx} className="flex items-center justify-between border-b pb-2">
                     <div className="text-sm text-muted-foreground">
                       {formatDate(data.date)}
@@ -249,9 +249,9 @@ function DashboardPage() {
             <CardDescription>Your latest workouts</CardDescription>
           </CardHeader>
           <CardContent>
-            {recentActivity && recentActivity.length > 0 ? (
+            {(recentActivity as any[]).length > 0 ? (
               <div className="space-y-4">
-                {recentActivity.map((activity) => (
+                {(recentActivity as any[]).map((activity: any) => (
                   <div key={activity.instanceId} className="border-b pb-2">
                     <div className="flex justify-between items-start">
                       <div>

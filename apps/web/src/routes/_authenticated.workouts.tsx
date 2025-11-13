@@ -18,6 +18,39 @@ export const Route = createFileRoute("/_authenticated/workouts")({
   component: WorkoutsPage,
 });
 
+interface WorkoutTemplate {
+  id: string;
+  userId: string;
+  name: string;
+  type: "run" | "reps" | "time";
+  description: string | null;
+  distance: number | null;
+  targetReps: number | null;
+  targetDuration: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface WorkoutInstance {
+  id: string;
+  templateId: string;
+  userId: string;
+  completed: boolean;
+  completedAt: Date | null;
+  duration: number | null;
+  lapTimes: unknown;
+  actualReps: number | null;
+  actualDuration: number | null;
+  notes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface WorkoutInstanceWithTemplate {
+  instance: WorkoutInstance;
+  template: WorkoutTemplate | null;
+}
+
 function WorkoutsPage() {
   const { data: session } = useSession();
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -29,36 +62,38 @@ function WorkoutsPage() {
   const templatesQueryOptions = trpc.workoutTemplates.getAll.queryOptions({
     userId: session?.user.id || "",
   });
-  const { data: templates } = useQuery(templatesQueryOptions);
+  const { data: templates = [] } = useQuery(templatesQueryOptions);
 
   const instancesQueryOptions = trpc.workoutInstances.getAll.queryOptions({
     userId: session?.user.id || "",
     limit: 20,
   });
-  const { data: instances } = useQuery(instancesQueryOptions);
+  const { data: instances = [] } = useQuery(instancesQueryOptions);
 
-  const createInstanceMutationOptions = trpc.workoutInstances.create.mutationOptions({
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: trpc.workoutInstances.getAll.queryKey(),
-      });
-      setSelectedTemplate(null);
-      setLapTimes([]);
-      setCurrentLapInput("");
-    },
-  });
-  const createInstanceMutation = useMutation(createInstanceMutationOptions);
+  const createInstanceMutation = useMutation(
+    trpc.workoutInstances.create.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.workoutInstances.getAll.queryKey(),
+        });
+        setSelectedTemplate(null);
+        setLapTimes([]);
+        setCurrentLapInput("");
+      },
+    }) as any
+  );
 
-  const markCompleteMutationOptions = trpc.workoutInstances.markComplete.mutationOptions({
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: trpc.workoutInstances.getAll.queryKey(),
-      });
-    },
-  });
-  const markCompleteMutation = useMutation(markCompleteMutationOptions);
+  const markCompleteMutation = useMutation(
+    trpc.workoutInstances.markComplete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.workoutInstances.getAll.queryKey(),
+        });
+      },
+    }) as any
+  );
 
-  const template = templates?.find((t) => t.id === selectedTemplate);
+  const template = (templates as WorkoutTemplate[]).find((t: WorkoutTemplate) => t.id === selectedTemplate);
 
   const handleAddLap = () => {
     const lapTime = parseFloat(currentLapInput);
@@ -84,7 +119,7 @@ function WorkoutsPage() {
 
     if (template.type === "run") {
       const duration = parseInt(formData.get("duration") as string);
-      createInstanceMutation.mutate({
+      (createInstanceMutation.mutate as any)({
         ...baseData,
         completed: true,
         duration,
@@ -92,14 +127,14 @@ function WorkoutsPage() {
       });
     } else if (template.type === "reps") {
       const actualReps = parseInt(formData.get("actualReps") as string);
-      createInstanceMutation.mutate({
+      (createInstanceMutation.mutate as any)({
         ...baseData,
         completed: true,
         actualReps,
       });
     } else if (template.type === "time") {
       const actualDuration = parseInt(formData.get("actualDuration") as string);
-      createInstanceMutation.mutate({
+      (createInstanceMutation.mutate as any)({
         ...baseData,
         completed: true,
         actualDuration,
@@ -131,7 +166,7 @@ function WorkoutsPage() {
           <div className="mb-6">
             <h2 className="text-xl font-semibold mb-4">Select a workout to record</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {templates?.map((t) => (
+              {(templates as WorkoutTemplate[]).map((t: WorkoutTemplate) => (
                 <Card key={t.id} className="cursor-pointer hover:border-primary" onClick={() => setSelectedTemplate(t.id)}>
                   <CardHeader>
                     <CardTitle>{t.name}</CardTitle>
@@ -148,7 +183,7 @@ function WorkoutsPage() {
               ))}
             </div>
 
-            {templates && templates.length === 0 && (
+            {(templates as WorkoutTemplate[]).length === 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle>No templates available</CardTitle>
@@ -264,7 +299,7 @@ function WorkoutsPage() {
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">Recent Workouts</h2>
           <div className="space-y-4">
-            {instances?.map((item) => {
+            {(instances as WorkoutInstanceWithTemplate[]).map((item: WorkoutInstanceWithTemplate) => {
               const inst = item.instance;
               const tmpl = item.template;
               if (!tmpl) return null;
@@ -289,9 +324,9 @@ function WorkoutsPage() {
                       <div>
                         <p>Distance: {tmpl.distance} miles</p>
                         {inst.duration && <p>Time: {formatDuration(inst.duration)}</p>}
-                        {inst.lapTimes && (
+                        {!!(inst.lapTimes && Array.isArray(inst.lapTimes)) && (
                           <p className="text-sm text-muted-foreground">
-                            Laps: {(inst.lapTimes as number[]).length}
+                            Laps: {inst.lapTimes.length}
                           </p>
                         )}
                       </div>
@@ -317,7 +352,7 @@ function WorkoutsPage() {
                         size="sm"
                         className="mt-2"
                         onClick={() => {
-                          markCompleteMutation.mutate({
+                          (markCompleteMutation.mutate as any)({
                             id: inst.id,
                             userId: session?.user.id || "",
                           });
@@ -332,7 +367,7 @@ function WorkoutsPage() {
             })}
           </div>
 
-          {instances && instances.length === 0 && (
+          {(instances as WorkoutInstanceWithTemplate[]).length === 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>No workouts yet</CardTitle>

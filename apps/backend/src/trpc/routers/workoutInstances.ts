@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { router, publicProcedure } from '../trpc';
 import { workoutInstances, workoutTemplates } from '../../db/schema';
 import { eq, and, desc } from 'drizzle-orm';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 const createInstanceSchema = z.object({
   templateId: z.string(),
