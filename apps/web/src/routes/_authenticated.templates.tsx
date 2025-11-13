@@ -106,20 +106,16 @@ function TemplatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b">
-        <div className="container mx-auto p-4">
-          <h1 className="text-2xl font-bold">Workout Templates</h1>
-        </div>
-      </header>
-      <main className="container mx-auto p-4">
-        {!showCreateForm && (
-          <div className="mb-4">
+    <div className="min-h-full bg-background">
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Workout Templates</h1>
+          {!showCreateForm && (
             <Button onClick={() => setShowCreateForm(true)}>
               Create New Template
             </Button>
-          </div>
-        )}
+          )}
+        </div>
 
         {showCreateForm && !workoutType && (
           <Card className="mb-6">
@@ -288,7 +284,7 @@ function TemplatesPage() {
             </CardHeader>
           </Card>
         )}
-      </main>
+      </div>
     </div>
   );
 }

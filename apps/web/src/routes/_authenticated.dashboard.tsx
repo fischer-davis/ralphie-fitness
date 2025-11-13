@@ -56,15 +56,11 @@ function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b">
-        <div className="container mx-auto p-4">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-        </div>
-      </header>
-      <main className="container mx-auto p-4">
+    <div className="min-h-full bg-background">
+      <div className="p-6">
+        <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
         {/* Overall Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card>
             <CardHeader>
               <CardTitle className="text-sm font-medium">Total Workouts</CardTitle>
@@ -282,7 +278,7 @@ function DashboardPage() {
             )}
           </CardContent>
         </Card>
-      </main>
+      </div>
     </div>
   );
 }

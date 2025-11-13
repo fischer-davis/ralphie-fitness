@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useSession } from "@/lib/auth";
 import { useEffect } from "react";
+import { AppLayout } from "@/components/layout/app-layout";
 
 // This is a layout route for authenticated pages
 // All routes nested under this will require authentication
@@ -35,5 +36,9 @@ function AuthenticatedLayout() {
     return null; // Will redirect via useEffect
   }
 
-  return <Outlet />;
+  return (
+    <AppLayout>
+      <Outlet />
+    </AppLayout>
+  );
 }

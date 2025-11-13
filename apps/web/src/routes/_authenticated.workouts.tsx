@@ -155,13 +155,9 @@ function WorkoutsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b">
-        <div className="container mx-auto p-4">
-          <h1 className="text-2xl font-bold">My Workouts</h1>
-        </div>
-      </header>
-      <main className="container mx-auto p-4">
+    <div className="min-h-full bg-background">
+      <div className="p-6">
+        <h1 className="text-3xl font-bold mb-6">My Workouts</h1>
         {!selectedTemplate && (
           <div className="mb-6">
             <h2 className="text-xl font-semibold mb-4">Select a workout to record</h2>
@@ -378,7 +374,7 @@ function WorkoutsPage() {
             </Card>
           )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
