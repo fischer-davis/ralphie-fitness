@@ -27,28 +27,45 @@ async function main() {
 
   // Clear existing data (in reverse order of dependencies)
   console.log('🧹 Clearing existing data...');
-  await db.delete(schema.workoutInstances);
-  await db.delete(schema.workoutTemplates);
-  await db.delete(schema.workouts);
-  await db.delete(schema.session);
-  await db.delete(schema.account);
-  await db.delete(schema.verification);
-  await db.delete(schema.user);
+  try {
+    await db.delete(schema.workoutInstances);
+    await db.delete(schema.workoutTemplates);
+    await db.delete(schema.workouts);
+    await db.delete(schema.session);
+    await db.delete(schema.account);
+    await db.delete(schema.verification);
+    await db.delete(schema.user);
+  } catch (error) {
+    console.log('⚠️  Some tables may not exist yet, will create fresh data...');
+  }
 
   // Create test user
   console.log('👤 Creating test user...');
   const userId = randomUUID();
   const hashedPassword = await bcrypt.hash(TEST_USER_PASSWORD, 10);
 
-  await db.insert(schema.user).values({
-    id: userId,
-    name: 'Test User',
-    email: TEST_USER_EMAIL,
-    emailVerified: true,
-    image: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
+  try {
+    await db.insert(schema.user).values({
+      id: userId,
+      name: 'Test User',
+      email: TEST_USER_EMAIL,
+      emailVerified: true,
+      image: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  } catch (error: any) {
+    if (error.code === '42P01') {
+      console.error('\n❌ ERROR: Database tables do not exist!');
+      console.error('Please run the following command first to create the database schema:');
+      console.error('  npm run db:push');
+      console.error('\nOr if you have migrations:');
+      console.error('  npm run db:migrate\n');
+      await client.end();
+      process.exit(1);
+    }
+    throw error;
+  }
 
   // Create account with password for test user
   await db.insert(schema.account).values({
