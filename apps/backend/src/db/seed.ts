@@ -272,14 +272,14 @@ async function main() {
   // Use drizzle-seed to add some random users
   console.log('👥 Adding random users with drizzle-seed...');
 
-  await seed(db, schema, { count: 10 }).refine((funcs) => ({
+  await seed(db as any, schema, { count: 10 }).refine((funcs) => ({
     user: {
       columns: {
         id: funcs.uuid(),
         name: funcs.fullName(),
         email: funcs.email(),
         emailVerified: funcs.boolean(),
-        image: funcs.url(),
+        image: funcs.default({ defaultValue: null }),
       },
     },
   }));
