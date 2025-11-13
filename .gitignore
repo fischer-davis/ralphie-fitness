@@ -9,3 +9,7 @@ dist-ssr
 .cache
 server/dist
 public/dist
+
+# Compiled JS files in src directories (TypeScript output)
+apps/*/src/**/*.js
+apps/*/src/**/*.jsx
