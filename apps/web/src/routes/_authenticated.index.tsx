@@ -39,8 +39,8 @@ function HomePage() {
   });
   const { data: recentActivity = [] as any[] } = useQuery(recentActivityQueryOptions);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatDate = (dateValue: string | Date) => {
+    const date = typeof dateValue === "string" ? new Date(dateValue) : dateValue;
     return date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
@@ -185,7 +185,7 @@ function HomePage() {
                           {activity.templateName}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {activity.completedAt && formatDate(activity.completedAt.toISOString())}
+                          {activity.completedAt ? formatDate(activity.completedAt) : ""}
                         </p>
                       </div>
                       <Dumbbell className="h-4 w-4 text-muted-foreground ml-2" />
