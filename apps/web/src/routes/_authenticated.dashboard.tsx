@@ -50,8 +50,8 @@ function DashboardPage() {
     return `${mins}m ${secs}s`;
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatDate = (dateValue: string | Date) => {
+    const date = typeof dateValue === "string" ? new Date(dateValue) : dateValue;
     return date.toLocaleDateString();
   };
 
@@ -257,7 +257,7 @@ function DashboardPage() {
                       <div>
                         <div className="font-medium">{activity.templateName}</div>
                         <div className="text-sm text-muted-foreground">
-                          {activity.completedAt && formatDate(activity.completedAt.toISOString())}
+                          {activity.completedAt && formatDate(activity.completedAt)}
                         </div>
                       </div>
                       <div className="text-right">
