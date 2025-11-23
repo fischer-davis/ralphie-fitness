@@ -10,6 +10,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
+import {
   AreaChart,
   Area,
   BarChart,
@@ -17,9 +25,7 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -65,6 +71,31 @@ function DashboardPage() {
   const formatDate = (dateValue: string | Date) => {
     const date = typeof dateValue === "string" ? new Date(dateValue) : dateValue;
     return date.toLocaleDateString();
+  };
+
+  const runningPerformanceConfig: ChartConfig = {
+    distance: {
+      label: "Distance (mi)",
+      color: "var(--chart-1)",
+    },
+  };
+
+  const repWorkoutConfig: ChartConfig = {
+    reps: {
+      label: "Completed",
+      color: "var(--chart-1)",
+    },
+    target: {
+      label: "Target",
+      color: "var(--chart-3)",
+    },
+  };
+
+  const timeWorkoutConfig: ChartConfig = {
+    duration: {
+      label: "Duration (seconds)",
+      color: "var(--chart-2)",
+    },
   };
 
   return (
@@ -130,48 +161,45 @@ function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <AreaChart
-                  data={runStats.chartData.map((data: any) => ({
-                    date: formatDate(data.date).replace('/' + new Date(data.date).getFullYear(), ''),
-                    distance: data.distance,
-                    time: data.duration / 60,
-                  }))}
-                >
-                  <defs>
-                    <linearGradient id="colorDistance" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis
-                    dataKey="date"
-                    className="text-xs"
-                    tick={{ fontSize: 12 }}
-                  />
-                  <YAxis
-                    label={{ value: 'Distance (mi)', angle: -90, position: 'insideLeft' }}
-                    className="text-xs"
-                    tick={{ fontSize: 12 }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                    }}
-                    labelStyle={{ color: 'hsl(var(--foreground))' }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="distance"
-                    stroke="hsl(var(--primary))"
-                    fillOpacity={1}
-                    fill="url(#colorDistance)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <ChartContainer
+                config={runningPerformanceConfig}
+                className="h-[250px] w-full"
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={runStats.chartData.map((data: any) => ({
+                      date: formatDate(data.date).replace('/' + new Date(data.date).getFullYear(), ''),
+                      distance: data.distance,
+                      time: data.duration / 60,
+                    }))}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis
+                      dataKey="date"
+                      className="text-xs"
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                    />
+                    <YAxis
+                      label={{ value: "Distance (mi)", angle: -90, position: "insideLeft" }}
+                      className="text-xs"
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
+                    <Area
+                      type="natural"
+                      dataKey="distance"
+                      stroke="var(--color-distance)"
+                      fillOpacity={0.3}
+                      fill="var(--color-distance)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </ChartContainer>
             </CardContent>
           </Card>
         )}
@@ -202,37 +230,37 @@ function DashboardPage() {
                   </div>
                 </div>
               </div>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart
-                  data={repStats.chartData.map((data: any) => ({
-                    date: formatDate(data.date).replace('/' + new Date(data.date).getFullYear(), ''),
-                    reps: data.reps,
-                    target: data.target,
-                  }))}
-                >
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis
-                    dataKey="date"
-                    className="text-xs"
-                    tick={{ fontSize: 12 }}
-                  />
-                  <YAxis
-                    className="text-xs"
-                    tick={{ fontSize: 12 }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                    }}
-                    labelStyle={{ color: 'hsl(var(--foreground))' }}
-                  />
-                  <Legend />
-                  <Bar dataKey="reps" fill="hsl(var(--primary))" name="Completed" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="target" fill="hsl(var(--muted))" name="Target" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <ChartContainer config={repWorkoutConfig} className="h-[250px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={repStats.chartData.map((data: any) => ({
+                      date: formatDate(data.date).replace('/' + new Date(data.date).getFullYear(), ''),
+                      reps: data.reps,
+                      target: data.target,
+                    }))}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis
+                      dataKey="date"
+                      className="text-xs"
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                    />
+                    <YAxis
+                      className="text-xs"
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <ChartLegend content={<ChartLegendContent />} />
+                    <Bar dataKey="reps" radius={[8, 8, 0, 0]} fill="var(--color-reps)" />
+                    <Bar dataKey="target" radius={[8, 8, 0, 0]} fill="var(--color-target)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
             </CardContent>
           </Card>
         )}
@@ -265,48 +293,42 @@ function DashboardPage() {
                   </div>
                 </div>
               </div>
-              <ResponsiveContainer width="100%" height={250}>
-                <AreaChart
-                  data={timeStats.chartData.map((data: any) => ({
-                    date: formatDate(data.date).replace('/' + new Date(data.date).getFullYear(), ''),
-                    duration: data.duration,
-                    target: data.target,
-                  }))}
-                >
-                  <defs>
-                    <linearGradient id="colorDuration" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis
-                    dataKey="date"
-                    className="text-xs"
-                    tick={{ fontSize: 12 }}
-                  />
-                  <YAxis
-                    label={{ value: 'Duration (seconds)', angle: -90, position: 'insideLeft' }}
-                    className="text-xs"
-                    tick={{ fontSize: 12 }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                    }}
-                    labelStyle={{ color: 'hsl(var(--foreground))' }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="duration"
-                    stroke="hsl(var(--primary))"
-                    fillOpacity={1}
-                    fill="url(#colorDuration)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <ChartContainer config={timeWorkoutConfig} className="h-[250px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={timeStats.chartData.map((data: any) => ({
+                      date: formatDate(data.date).replace('/' + new Date(data.date).getFullYear(), ''),
+                      duration: data.duration,
+                      target: data.target,
+                    }))}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis
+                      dataKey="date"
+                      className="text-xs"
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                    />
+                    <YAxis
+                      label={{ value: "Duration (seconds)", angle: -90, position: "insideLeft" }}
+                      className="text-xs"
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
+                    <Area
+                      type="natural"
+                      dataKey="duration"
+                      stroke="var(--color-duration)"
+                      fillOpacity={0.3}
+                      fill="var(--color-duration)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </ChartContainer>
             </CardContent>
           </Card>
         )}
