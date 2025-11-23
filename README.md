@@ -1,13 +1,20 @@
 # Ralphie Fitness
 
-A modern, full-stack fitness tracking application built with React, Hono, and TypeScript.
+A modern, full-stack fitness tracking application built with React, Hono, and TypeScript. Available on web and mobile (React Native).
 
 ## Tech Stack
 
-### Frontend
+### Frontend (Web)
 - **React 18** with **Vite** for fast development
 - **Tailwind CSS v4** for styling
 - **shadcn/ui** for beautiful, accessible UI components
+- **tRPC** for type-safe API calls
+- **TanStack Query** (React Query) for data fetching
+- **better-auth** for authentication
+
+### Mobile (React Native)
+- **React Native 0.74** for iOS and Android
+- **React Navigation** for native navigation
 - **tRPC** for type-safe API calls
 - **TanStack Query** (React Query) for data fetching
 - **better-auth** for authentication
@@ -37,6 +44,16 @@ ralphie-fitness/
 │   │   │   └── lib/          # Utilities, tRPC, auth clients
 │   │   ├── tailwind.config.js
 │   │   └── components.json   # shadcn/ui config
+│   │
+│   ├── mobile/           # React Native mobile app
+│   │   ├── src/
+│   │   │   ├── components/   # React Native components
+│   │   │   ├── screens/      # App screens
+│   │   │   ├── navigation/   # React Navigation setup
+│   │   │   └── lib/          # Utilities, tRPC, auth clients
+│   │   ├── ios/              # iOS native project
+│   │   ├── android/          # Android native project
+│   │   └── App.tsx           # Root component
 │   │
 │   └── backend/          # Hono backend
 │       ├── src/
@@ -126,13 +143,42 @@ ralphie-fitness/
 
 5. **Start development servers**
    ```bash
-   # From root directory - starts both frontend and backend
+   # From root directory - starts web frontend and backend
    npm run dev
    ```
 
-   The frontend will be available at `http://localhost:5173`
+   The web frontend will be available at `http://localhost:5173`
 
    The backend will be available at `http://localhost:3001`
+
+### Mobile App Setup
+
+To set up and run the mobile app:
+
+1. **Complete native setup**
+
+   See [apps/mobile/NATIVE_SETUP.md](apps/mobile/NATIVE_SETUP.md) for detailed instructions on initializing the iOS and Android projects.
+
+2. **Install mobile dependencies**
+   ```bash
+   cd apps/mobile
+   npm install
+
+   # iOS only
+   cd ios && pod install && cd ..
+   ```
+
+3. **Start the mobile app**
+   ```bash
+   # Start Metro bundler
+   npm start
+
+   # In another terminal, run:
+   npm run ios     # For iOS
+   npm run android # For Android
+   ```
+
+For detailed mobile app documentation, see [apps/mobile/README.md](apps/mobile/README.md).
 
 ## Development
 

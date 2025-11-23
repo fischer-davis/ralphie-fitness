@@ -2,7 +2,7 @@
 
 ## Overview
 
-Ralphie Fitness is a full-stack fitness tracking application built with modern web technologies. This monorepo uses Turborepo for workspace management and includes a React frontend and a Hono backend.
+Ralphie Fitness is a full-stack fitness tracking application built with modern web technologies. This monorepo uses Turborepo for workspace management and includes a React web frontend, a React Native mobile app, and a Hono backend.
 
 ## Project Structure
 
@@ -10,6 +10,7 @@ Ralphie Fitness is a full-stack fitness tracking application built with modern w
 ralphie-fitness/
 ├── apps/
 │   ├── web/              # React + Vite frontend
+│   ├── mobile/           # React Native mobile app
 │   └── backend/          # Hono + TypeScript backend
 ├── packages/
 │   ├── ui/               # Shared UI components
@@ -20,10 +21,18 @@ ralphie-fitness/
 
 ## Tech Stack
 
-### Frontend (`apps/web`)
+### Frontend Web (`apps/web`)
 - **Framework**: React 18 with Vite
 - **Styling**: Tailwind CSS v4
 - **UI Components**: shadcn/ui (configured)
+- **State Management**: TanStack Query (React Query)
+- **API Client**: tRPC React Query
+- **Authentication**: better-auth client
+- **Type Safety**: TypeScript 5.5.4
+
+### Mobile (`apps/mobile`)
+- **Framework**: React Native 0.74
+- **Navigation**: React Navigation (Stack + Bottom Tabs)
 - **State Management**: TanStack Query (React Query)
 - **API Client**: tRPC React Query
 - **Authentication**: better-auth client
@@ -136,7 +145,30 @@ npm run db:generate  # Generate migrations from schema
 npm run db:migrate   # Run migrations
 npm run db:push      # Push schema directly (dev only)
 npm run db:studio    # Open Drizzle Studio GUI
+npm run db:seed      # Seed database with test data
 ```
+
+### Database Seeding
+
+The database includes a comprehensive seed script that populates test data:
+
+```bash
+cd apps/backend
+npm run db:seed
+```
+
+This will create:
+- **Test user** with login credentials (see below)
+- **16 workout templates** (5 runs, 6 reps workouts, 5 time-based exercises)
+- **120 workout instances** with realistic data over 6 months
+- **30 legacy workouts** for backward compatibility
+- **10 random users** for testing
+
+**Test User Login:**
+- **Email**: `test@ralphie.fitness`
+- **Password**: `TestPassword123!`
+
+The test user has extensive workout history including runs, strength training, and time-based exercises.
 
 ### Adding shadcn/ui Components
 
@@ -330,6 +362,113 @@ The project is fully type-safe from database to frontend:
 - Rebuild TypeScript: `npm run build`
 - Check TypeScript versions match across workspace
 
+## Mobile App Development
+
+### Mobile App Structure
+
+The mobile app (`apps/mobile`) mirrors the web app's architecture but uses React Native components:
+
+- **Screens**: `apps/mobile/src/screens/` - Full-screen components (Home, Workouts, Profile, Login)
+- **Components**: `apps/mobile/src/components/` - Reusable React Native components
+- **Navigation**: `apps/mobile/src/navigation/` - React Navigation setup
+- **Library**: `apps/mobile/src/lib/` - Utilities, tRPC, auth clients (shared patterns with web)
+
+### Mobile tRPC Usage
+
+The mobile app uses **identical tRPC patterns** as the web app:
+
+```typescript
+import { useTRPC } from '@/lib/trpc';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { View, Text } from 'react-native';
+
+function MyScreen() {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  // Queries: Use queryOptions() with useQuery()
+  const statsQuery = trpc.stats.overview.queryOptions();
+  const { data } = useQuery(statsQuery);
+
+  // Mutations: Use mutationOptions() with useMutation()
+  const createMutation = trpc.workouts.create.mutationOptions({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: trpc.workouts.list.queryKey(),
+      });
+    },
+  });
+  const mutation = useMutation(createMutation);
+
+  return (
+    <View>
+      <Text>{data?.totalWorkouts}</Text>
+    </View>
+  );
+}
+```
+
+### Mobile Authentication
+
+Authentication in mobile follows the same pattern as web:
+
+```typescript
+import { useSession, signIn, signOut } from '@/lib/auth';
+import { View, Button } from 'react-native';
+
+function MyScreen() {
+  const { data: session } = useSession();
+
+  if (!session) {
+    return <Button title="Sign In" onPress={() => signIn.email({ email, password })} />;
+  }
+
+  return <Button title="Sign Out" onPress={() => signOut()} />;
+}
+```
+
+### Mobile API Configuration
+
+The mobile app automatically configures the API URL based on platform:
+- **iOS Simulator**: `http://localhost:3001`
+- **Android Emulator**: `http://10.0.2.2:3001` (Android emulator's host machine)
+- **Production**: Update `src/lib/config.ts`
+
+### Mobile Development Commands
+
+```bash
+# Start Metro bundler
+cd apps/mobile
+npm start
+
+# Run on iOS
+npm run ios
+
+# Run on Android
+npm run android
+
+# Type checking
+npm run typecheck
+```
+
+### Mobile-Specific Considerations
+
+1. **Platform-specific code**: Use `Platform.OS` for iOS/Android differences
+2. **Native dependencies**: iOS requires CocoaPods (`cd ios && pod install`)
+3. **API connectivity**:
+   - iOS simulator connects to `localhost`
+   - Android emulator needs `10.0.2.2` instead of `localhost`
+   - Physical devices need your computer's local IP
+4. **Navigation**: Uses React Navigation (not React Router)
+5. **Styling**: Uses React Native StyleSheet (not Tailwind CSS)
+
+### Adding a New Screen
+
+1. Create screen in `apps/mobile/src/screens/MyNewScreen.tsx`
+2. Add route to `apps/mobile/src/navigation/AppNavigator.tsx`
+3. Use tRPC hooks with same patterns as web
+4. Style with React Native StyleSheet
+
 ## Additional Resources
 
 - [Hono Documentation](https://hono.dev)
@@ -339,15 +478,19 @@ The project is fully type-safe from database to frontend:
 - [shadcn/ui Documentation](https://ui.shadcn.com)
 - [Tailwind CSS Documentation](https://tailwindcss.com)
 - [Ultracite Documentation](https://www.ultracite.ai)
+- [React Native Documentation](https://reactnative.dev)
+- [React Navigation Documentation](https://reactnavigation.org)
 
 ## Notes for AI Assistants
 
 - Always run `npm run format` before committing
-- **tRPC Usage**: Always use `const trpc = useTRPC()` hook in components, never import `trpc` directly
+- **tRPC Usage**: Always use `const trpc = useTRPC()` hook in components, never import `trpc` directly (applies to both web and mobile)
 - **tRPC Queries**: Use `useQuery(trpc.procedure.queryOptions({ ... }))` pattern
 - **tRPC Mutations**: Use `useMutation(trpc.procedure.mutationOptions({ ... }))` pattern
 - **Cache Invalidation**: Use `queryClient.invalidateQueries({ queryKey: trpc.procedure.queryKey() })`
 - Database migrations should be generated, not hand-written
 - Follow the existing code patterns for consistency
-- Use shadcn components when building UI - they're already configured
-- Environment variables are required for both apps to function
+- **Web UI**: Use shadcn components when building UI - they're already configured
+- **Mobile UI**: Use React Native components (View, Text, TouchableOpacity, etc.) and StyleSheet for styling
+- Environment variables are required for all apps to function
+- **Mobile-specific**: tRPC patterns are identical between web and mobile, only UI components differ
