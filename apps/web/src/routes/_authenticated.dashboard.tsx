@@ -76,25 +76,25 @@ function DashboardPage() {
   const runningPerformanceConfig: ChartConfig = {
     distance: {
       label: "Distance (mi)",
-      color: "hsl(var(--chart-1))",
+      color: "var(--chart-1)",
     },
   };
 
   const repWorkoutConfig: ChartConfig = {
     reps: {
       label: "Completed",
-      color: "hsl(var(--chart-1))",
+      color: "var(--chart-1)",
     },
     target: {
       label: "Target",
-      color: "hsl(var(--chart-3))",
+      color: "var(--chart-3)",
     },
   };
 
   const timeWorkoutConfig: ChartConfig = {
     duration: {
       label: "Duration (seconds)",
-      color: "hsl(var(--chart-2))",
+      color: "var(--chart-2)",
     },
   };
 

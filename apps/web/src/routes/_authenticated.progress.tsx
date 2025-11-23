@@ -72,25 +72,25 @@ function ProgressPage() {
   const runningPaceConfig: ChartConfig = {
     pace: {
       label: "Pace (min/mi)",
-      color: "hsl(var(--chart-1))",
+      color: "var(--chart-1)",
     },
   };
 
   const runningDistanceConfig: ChartConfig = {
     distance: {
       label: "Distance (mi)",
-      color: "hsl(var(--chart-2))",
+      color: "var(--chart-2)",
     },
   };
 
   const repProgressConfig: ChartConfig = {
     reps: {
       label: "Actual",
-      color: "hsl(var(--chart-1))",
+      color: "var(--chart-1)",
     },
     target: {
       label: "Target",
-      color: "hsl(var(--chart-3))",
+      color: "var(--chart-3)",
     },
   };
 
