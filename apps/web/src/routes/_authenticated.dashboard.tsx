@@ -9,6 +9,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
@@ -56,15 +68,11 @@ function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b">
-        <div className="container mx-auto p-4">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-        </div>
-      </header>
-      <main className="container mx-auto p-4">
+    <div className="min-h-full bg-background">
+      <div className="p-6">
+        <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
         {/* Overall Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card>
             <CardHeader>
               <CardTitle className="text-sm font-medium">Total Workouts</CardTitle>
@@ -122,26 +130,48 @@ function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                {runStats.chartData.map((data: any, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between border-b pb-2">
-                    <div className="text-sm text-muted-foreground">
-                      {formatDate(data.date)}
-                    </div>
-                    <div className="flex gap-4">
-                      <div className="text-sm">
-                        <span className="font-medium">{data.distance}</span> mi
-                      </div>
-                      <div className="text-sm">
-                        <span className="font-medium">{formatDuration(data.duration)}</span>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {(data.duration / 60 / data.distance).toFixed(2)} min/mi
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <ResponsiveContainer width="100%" height={250}>
+                <AreaChart
+                  data={runStats.chartData.map((data: any) => ({
+                    date: formatDate(data.date).replace('/' + new Date(data.date).getFullYear(), ''),
+                    distance: data.distance,
+                    time: data.duration / 60,
+                  }))}
+                >
+                  <defs>
+                    <linearGradient id="colorDistance" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis
+                    dataKey="date"
+                    className="text-xs"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis
+                    label={{ value: 'Distance (mi)', angle: -90, position: 'insideLeft' }}
+                    className="text-xs"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                    }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="distance"
+                    stroke="hsl(var(--primary))"
+                    fillOpacity={1}
+                    fill="url(#colorDistance)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         )}
@@ -156,7 +186,7 @@ function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-3 gap-4 mb-6">
                 <div>
                   <div className="text-sm text-muted-foreground">Total Reps</div>
                   <div className="text-2xl font-bold">{repStats.totalReps}</div>
@@ -172,23 +202,37 @@ function DashboardPage() {
                   </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                {repStats.chartData.map((data: any, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between border-b pb-2">
-                    <div className="text-sm text-muted-foreground">
-                      {formatDate(data.date)}
-                    </div>
-                    <div className="flex gap-4">
-                      <div className="text-sm">
-                        <span className="font-medium">{data.reps}</span> reps
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Target: {data.target}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart
+                  data={repStats.chartData.map((data: any) => ({
+                    date: formatDate(data.date).replace('/' + new Date(data.date).getFullYear(), ''),
+                    reps: data.reps,
+                    target: data.target,
+                  }))}
+                >
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis
+                    dataKey="date"
+                    className="text-xs"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis
+                    className="text-xs"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                    }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  />
+                  <Legend />
+                  <Bar dataKey="reps" fill="hsl(var(--primary))" name="Completed" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="target" fill="hsl(var(--muted))" name="Target" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         )}
@@ -203,7 +247,7 @@ function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-3 gap-4 mb-6">
                 <div>
                   <div className="text-sm text-muted-foreground">Total Duration</div>
                   <div className="text-2xl font-bold">
@@ -221,23 +265,48 @@ function DashboardPage() {
                   </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                {timeStats.chartData.map((data: any, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between border-b pb-2">
-                    <div className="text-sm text-muted-foreground">
-                      {formatDate(data.date)}
-                    </div>
-                    <div className="flex gap-4">
-                      <div className="text-sm">
-                        <span className="font-medium">{formatDuration(data.duration)}</span>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Target: {formatDuration(data.target)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <ResponsiveContainer width="100%" height={250}>
+                <AreaChart
+                  data={timeStats.chartData.map((data: any) => ({
+                    date: formatDate(data.date).replace('/' + new Date(data.date).getFullYear(), ''),
+                    duration: data.duration,
+                    target: data.target,
+                  }))}
+                >
+                  <defs>
+                    <linearGradient id="colorDuration" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis
+                    dataKey="date"
+                    className="text-xs"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis
+                    label={{ value: 'Duration (seconds)', angle: -90, position: 'insideLeft' }}
+                    className="text-xs"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                    }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="duration"
+                    stroke="hsl(var(--primary))"
+                    fillOpacity={1}
+                    fill="url(#colorDuration)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         )}
@@ -282,7 +351,7 @@ function DashboardPage() {
             )}
           </CardContent>
         </Card>
-      </main>
+      </div>
     </div>
   );
 }
